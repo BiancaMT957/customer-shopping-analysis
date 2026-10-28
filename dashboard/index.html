@@ -1,0 +1,897 @@
+<title>Customer Shopping Dashboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+/* ============================================================
+   TOKEN SYSTEM
+   Layout: sticky dark header · responsive 2-col chart grid · KPI strip
+   Color: warm-slate neutral base · validated reference palette
+   Type: Sora (display/numbers) + Inter (body/labels)
+   ============================================================ */
+:root {
+  /* Surfaces */
+  --bg:          #F3F4F8;
+  --bg-card:     #FFFFFF;
+  --bg-header:   #10131C;
+  --bg-tag:      rgba(42,120,214,.10);
+
+  /* Text */
+  --fg:          #10131C;
+  --fg-muted:    #5C6070;
+  --fg-subtle:   #9198A8;
+  --fg-inverse:  #F0F1F5;
+
+  /* Borders & shadow */
+  --border:      #E0E3EB;
+  --border-card: #E8EBF3;
+  --shadow-sm:   0 1px 2px rgba(16,19,28,.06);
+  --shadow-md:   0 2px 8px rgba(16,19,28,.08), 0 1px 2px rgba(16,19,28,.04);
+
+  /* Categorical series (reference palette, light mode) */
+  --s1: #2a78d6;  /* blue    */
+  --s2: #eb6834;  /* orange  */
+  --s3: #1baf7a;  /* aqua    */
+  --s4: #eda100;  /* yellow  */
+  --s5: #e87ba4;  /* magenta */
+  --s6: #6250d6;  /* violet  */
+  --s7: #008300;  /* green   */
+  --s8: #e34948;  /* red     */
+
+  /* Accent (KPI accent bar, recommendation numbers) */
+  --accent: var(--s1);
+
+  /* Radius */
+  --r: 12px;
+  --r-sm: 8px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:          #0D1019;
+    --bg-card:     #161B27;
+    --bg-header:   #080B12;
+    --bg-tag:      rgba(57,135,229,.14);
+
+    --fg:          #E8EAF2;
+    --fg-muted:    #8B93A8;
+    --fg-subtle:   #525C72;
+    --fg-inverse:  #E8EAF2;
+
+    --border:      #1E2436;
+    --border-card: #1A2030;
+    --shadow-sm:   0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:   0 2px 8px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.2);
+
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+    --s4: #c98500;
+    --s5: #d55181;
+    --s6: #9085e9;
+    --s7: #008300;
+    --s8: #e66767;
+
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:          #0D1019;
+  --bg-card:     #161B27;
+  --bg-header:   #080B12;
+  --bg-tag:      rgba(57,135,229,.14);
+
+  --fg:          #E8EAF2;
+  --fg-muted:    #8B93A8;
+  --fg-subtle:   #525C72;
+  --fg-inverse:  #E8EAF2;
+
+  --border:      #1E2436;
+  --border-card: #1A2030;
+  --shadow-sm:   0 1px 2px rgba(0,0,0,.3);
+  --shadow-md:   0 2px 8px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.2);
+
+  --s1: #3987e5;
+  --s2: #d95926;
+  --s3: #199e70;
+  --s4: #c98500;
+  --s5: #d55181;
+  --s6: #9085e9;
+  --s7: #008300;
+  --s8: #e66767;
+
+  color-scheme: dark;
+}
+
+/* ---- Reset / base ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ---- Header ---- */
+.site-header {
+  background: var(--bg-header);
+  padding-block: 20px;
+  padding-left:  max(24px, env(safe-area-inset-left,  0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-icon {
+  width: 36px; height: 36px;
+  background: var(--s1);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.header-title {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: clamp(15px, 2.5vw, 19px);
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.header-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,.45);
+  margin-top: 2px;
+  letter-spacing: .01em;
+}
+.header-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.tag {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  padding: 3px 11px;
+  font-size: 11.5px;
+  color: rgba(255,255,255,.65);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* ---- Main ---- */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-block: 28px 56px;
+  padding-left:  max(16px, env(safe-area-inset-left,  0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---- Section label ---- */
+.section-label {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--fg-subtle);
+  margin-bottom: 14px;
+}
+
+/* ---- KPI strip ---- */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+@media (max-width: 900px) { .kpi-strip { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 540px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--r);
+  padding: 18px 18px 16px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+}
+.kpi-icon {
+  font-size: 22px;
+  margin-bottom: 10px;
+  display: block;
+  line-height: 1;
+}
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--fg-muted);
+  margin-bottom: 5px;
+}
+.kpi-value {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: clamp(22px, 3.5vw, 28px);
+  font-weight: 800;
+  color: var(--fg);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.kpi-unit {
+  font-size: .5em;
+  font-weight: 600;
+  color: var(--fg-muted);
+  vertical-align: middle;
+}
+.kpi-sub {
+  font-size: 11.5px;
+  color: var(--fg-subtle);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ---- Chart grid ---- */
+.chart-section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+@media (max-width: 680px) { .chart-section { grid-template-columns: 1fr; } }
+
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--r);
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+  min-width: 0;
+}
+.chart-card.wide { grid-column: 1 / -1; }
+
+.chart-head {
+  margin-bottom: 14px;
+}
+.chart-title {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.chart-desc {
+  font-size: 12px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+}
+.chart-wrap {
+  position: relative;
+  height: 210px;
+  min-width: 0;
+}
+.chart-wrap.tall { height: 260px; }
+
+/* ---- Recommendations ---- */
+.reco-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.reco-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--r);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.reco-num {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--s1);
+  background: var(--bg-tag);
+  border-radius: 7px;
+  padding: 5px 9px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  letter-spacing: .05em;
+}
+.reco-body {}
+.reco-title {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 5px;
+  text-wrap: balance;
+}
+.reco-text {
+  font-size: 12.5px;
+  color: var(--fg-muted);
+  line-height: 1.6;
+}
+.badge {
+  display: inline-block;
+  margin-top: 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.badge-high   { background: rgba(227,73,72,.12);  color: var(--s8); }
+.badge-med    { background: rgba(237,161,0,.12);  color: var(--s4); }
+.badge-low    { background: rgba(27,175,122,.12); color: var(--s3); }
+
+/* ---- Insight bar ---- */
+.insight-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--r);
+  padding: 18px 22px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.insight-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.insight-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--fg-subtle);
+}
+.insight-val {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.insight-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* ---- Footer ---- */
+.footer {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--fg-subtle);
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.footer strong { color: var(--fg-muted); font-weight: 600; }
+</style>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <div class="header-icon">📊</div>
+      <div>
+        <div class="header-title">Customer Shopping Behavior Analysis</div>
+        <div class="header-sub">Proyecto de Portafolio · J. Valencia · PUCP · Análisis de Datos</div>
+      </div>
+    </div>
+    <div class="header-tags">
+      <span class="tag">3,900 clientes</span>
+      <span class="tag">18 variables</span>
+      <span class="tag">Python · SQL · Power BI</span>
+    </div>
+  </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+
+  <!-- KPIs -->
+  <div class="section-label">Indicadores Clave de Desempeño (KPIs)</div>
+  <div class="kpi-strip">
+
+    <div class="kpi-card">
+      <div class="kpi-accent" style="background:var(--s1)"></div>
+      <span class="kpi-icon">💰</span>
+      <div class="kpi-label">Ingresos Totales</div>
+      <div class="kpi-value">$233<span class="kpi-unit">K</span></div>
+      <div class="kpi-sub">3,900 transacciones</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-accent" style="background:var(--s2)"></div>
+      <span class="kpi-icon">🛒</span>
+      <div class="kpi-label">Ticket Promedio</div>
+      <div class="kpi-value">$59<span class="kpi-unit">.76</span></div>
+      <div class="kpi-sub">Rango: $20 – $100</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-accent" style="background:var(--s3)"></div>
+      <span class="kpi-icon">⭐</span>
+      <div class="kpi-label">Rating Promedio</div>
+      <div class="kpi-value">3.75<span class="kpi-unit">/5</span></div>
+      <div class="kpi-sub">Satisfacción del cliente</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-accent" style="background:var(--s6)"></div>
+      <span class="kpi-icon">🔁</span>
+      <div class="kpi-label">Tasa de Suscripción</div>
+      <div class="kpi-value">27<span class="kpi-unit">%</span></div>
+      <div class="kpi-sub">1,053 suscriptores</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-accent" style="background:var(--s4)"></div>
+      <span class="kpi-icon">🏷️</span>
+      <div class="kpi-label">Uso Código Promo</div>
+      <div class="kpi-value">43<span class="kpi-unit">%</span></div>
+      <div class="kpi-sub">1,677 clientes</div>
+    </div>
+
+  </div>
+
+  <!-- Quick insights bar -->
+  <div class="insight-bar">
+    <div class="insight-item">
+      <span class="insight-label">Edad Promedio</span>
+      <span class="insight-val">44.1 años</span>
+    </div>
+    <div class="insight-divider"></div>
+    <div class="insight-item">
+      <span class="insight-label">Compras Previas Prom.</span>
+      <span class="insight-val">25.4 pedidos</span>
+    </div>
+    <div class="insight-divider"></div>
+    <div class="insight-item">
+      <span class="insight-label">Mejor Temporada</span>
+      <span class="insight-val">Otoño ($60K)</span>
+    </div>
+    <div class="insight-divider"></div>
+    <div class="insight-item">
+      <span class="insight-label">Categoría Líder</span>
+      <span class="insight-val">Clothing (45%)</span>
+    </div>
+    <div class="insight-divider"></div>
+    <div class="insight-item">
+      <span class="insight-label">Método de Pago Top</span>
+      <span class="insight-val">PayPal (17%)</span>
+    </div>
+    <div class="insight-divider"></div>
+    <div class="insight-item">
+      <span class="insight-label">Clientes Recurrentes</span>
+      <span class="insight-val">+25 compras prom.</span>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="section-label">Análisis de Ventas</div>
+  <div class="chart-section">
+
+    <!-- 1 Category -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Revenue por Categoría</div>
+        <div class="chart-desc">Ingresos totales y participación por tipo de producto</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartCategory"></canvas>
+      </div>
+    </div>
+
+    <!-- 2 Season -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Ventas por Temporada</div>
+        <div class="chart-desc">Distribución estacional del revenue</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartSeason"></canvas>
+      </div>
+    </div>
+
+    <!-- 3 Top products – wide -->
+    <div class="chart-card wide">
+      <div class="chart-head">
+        <div class="chart-title">Top 10 Productos por Revenue</div>
+        <div class="chart-desc">Los artículos con mayor generación de ingresos — distribución muy pareja indica catálogo equilibrado</div>
+      </div>
+      <div class="chart-wrap tall">
+        <canvas id="chartProducts"></canvas>
+      </div>
+    </div>
+
+    <!-- 4 Age -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Revenue por Grupo de Edad</div>
+        <div class="chart-desc">El segmento 56–70 lidera en ingresos totales</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartAge"></canvas>
+      </div>
+    </div>
+
+    <!-- 5 Payment methods -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Métodos de Pago</div>
+        <div class="chart-desc">Preferencias de pago (distribución muy uniforme)</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartPayment"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Recommendations -->
+  <div class="section-label">Recomendaciones para Mejorar las Ventas</div>
+  <div class="reco-grid">
+
+    <div class="reco-card">
+      <div class="reco-num">01</div>
+      <div class="reco-body">
+        <div class="reco-title">Programa de Lealtad para Escalar Suscripciones</div>
+        <div class="reco-text">Solo el 27% de clientes tiene suscripción activa. Un programa de lealtad escalonado (envío gratis, acceso anticipado, recompensas por puntos) puede triplicar la retención y aumentar la frecuencia de compra en clientes existentes.</div>
+        <span class="badge badge-high">Alto impacto</span>
+      </div>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-num">02</div>
+      <div class="reco-body">
+        <div class="reco-title">Maximizar Campaña de Otoño (Temporada Pico)</div>
+        <div class="reco-text">El Otoño genera $60,018 — 7.6% más que el Verano. Aumentar presupuesto de marketing digital en agosto–octubre, asegurando stock suficiente de Outerwear y Clothing, puede ampliar este pico estacional significativamente.</div>
+        <span class="badge badge-high">Alto impacto</span>
+      </div>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-num">03</div>
+      <div class="reco-body">
+        <div class="reco-title">Replantear la Estrategia de Descuentos</div>
+        <div class="reco-text">El ticket promedio con descuento ($59.28) es casi igual al sin descuento ($60.13). Los descuentos actuales no aumentan el gasto. Migrar hacia bundles de productos y upselling dinámico puede mantener el margen y elevar el AOV.</div>
+        <span class="badge badge-med">Impacto medio</span>
+      </div>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-num">04</div>
+      <div class="reco-body">
+        <div class="reco-title">Expandir Portafolio Premium: Footwear y Outerwear</div>
+        <div class="reco-text">Footwear ($60.26 AOV) y Outerwear son categorías con menor volumen pero margen unitario competitivo. Diversificar el catálogo con SKUs premium en estas categorías reduce la dependencia de Clothing (44% del revenue total) y mitiga el riesgo de concentración.</div>
+        <span class="badge badge-med">Impacto medio</span>
+      </div>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-num">05</div>
+      <div class="reco-body">
+        <div class="reco-title">Segmentación Dirigida al Grupo 56–70 Años</div>
+        <div class="reco-text">El segmento de mayor edad aporta $65,256 (28% del revenue total) con 1,105 pedidos. Crear campañas de email marketing personalizadas, catálogos curados y experiencias de compra simplificadas para este grupo puede incrementar su frecuencia de compra sin adquirir nuevos clientes.</div>
+        <span class="badge badge-low">Retención</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <strong>J. Valencia</strong> · j.valencia@pucp.edu.pe · Portafolio de Análisis de Datos ·
+    Dataset: Customer Shopping Behavior (3,900 registros, 18 variables) ·
+    Herramientas: <strong>Python · SQL · Power BI</strong>
+  </div>
+
+</main>
+
+<!-- ===== CHARTS SCRIPT ===== -->
+<script>
+// ---- Resolve theme tokens for charts ----
+function getTheme() {
+  const root = document.documentElement;
+  const explicit = root.dataset.theme;
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = explicit === 'dark' || (!explicit && prefersDark);
+  const cs = getComputedStyle(root);
+  // Series colors
+  const s = (n) => cs.getPropertyValue('--s' + n).trim();
+  return {
+    isDark,
+    fg:      cs.getPropertyValue('--fg').trim(),
+    fgMuted: cs.getPropertyValue('--fg-muted').trim(),
+    grid:    isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)',
+    surface: isDark ? '#161B27' : '#FFFFFF',
+    series:  [s(1), s(2), s(3), s(4), s(5), s(6), s(7), s(8)],
+    tooltipBg:    isDark ? '#1E2A3E' : '#1E2532',
+    tooltipTitle: '#F0F1F5',
+    tooltipBody:  'rgba(240,241,245,.65)',
+  };
+}
+
+const fmt = (v) => '$' + v.toLocaleString('en-US');
+const fmtK = (v) => '$' + (v / 1000).toFixed(0) + 'K';
+
+function tooltipPlugin(theme) {
+  return {
+    backgroundColor: theme.tooltipBg,
+    titleColor:      theme.tooltipTitle,
+    bodyColor:       theme.tooltipBody,
+    borderColor:     'rgba(255,255,255,.08)',
+    borderWidth:     1,
+    cornerRadius:    8,
+    padding:         10,
+    displayColors:   true,
+    boxWidth:        10,
+    boxHeight:       10,
+  };
+}
+
+function axisStyle(theme) {
+  return {
+    grid:  { color: theme.grid, drawBorder: false },
+    ticks: { color: theme.fgMuted, font: { size: 11, family: "'Inter', system-ui" } },
+    border: { display: false },
+  };
+}
+
+function buildCharts() {
+  const t = getTheme();
+
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+
+  // ---- 1. CATEGORY ----
+  new Chart(document.getElementById('chartCategory'), {
+    type: 'bar',
+    data: {
+      labels: ['Clothing', 'Accessories', 'Footwear', 'Outerwear'],
+      datasets: [{
+        data:            [104264, 74200, 36093, 18524],
+        backgroundColor: [t.series[0], t.series[1], t.series[2], t.series[5]],
+        borderRadius:    6,
+        borderSkipped:   false,
+        barThickness:    36,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipPlugin(t),
+          callbacks: {
+            label: ctx => '  ' + fmt(ctx.raw),
+            title: ctx => ctx[0].label
+          }
+        }
+      },
+      scales: {
+        x: {
+          ...axisStyle(t),
+          ticks: { ...axisStyle(t).ticks, callback: v => fmtK(v) }
+        },
+        y: { ...axisStyle(t), grid: { display: false } }
+      }
+    }
+  });
+
+  // ---- 2. SEASON ----
+  const seasonColors = ['#4ADE80', '#FCD34D', t.series[1], '#93C5FD'];
+  new Chart(document.getElementById('chartSeason'), {
+    type: 'bar',
+    data: {
+      labels: ['Primavera', 'Verano', 'Otoño', 'Invierno'],
+      datasets: [{
+        data:            [58679, 55777, 60018, 58607],
+        backgroundColor: seasonColors,
+        borderRadius:    6,
+        borderSkipped:   false,
+        barThickness:    44,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipPlugin(t),
+          callbacks: { label: ctx => '  ' + fmt(ctx.raw) }
+        }
+      },
+      scales: {
+        x: { ...axisStyle(t), grid: { display: false } },
+        y: {
+          ...axisStyle(t),
+          min: 50000,
+          ticks: { ...axisStyle(t).ticks, callback: v => fmtK(v) }
+        }
+      }
+    }
+  });
+
+  // ---- 3. TOP PRODUCTS ----
+  const prodLabels = ['Blouse','Shirt','Dress','Pants','Jewelry','Sunglasses','Belt','Scarf','Sweater','Shorts'];
+  const prodData   = [10410, 10332, 10320, 10090, 10010, 9649, 9635, 9561, 9462, 9433];
+  const prodColors = t.series.slice(0, 8).concat(t.series[0], t.series[1]);
+  new Chart(document.getElementById('chartProducts'), {
+    type: 'bar',
+    data: {
+      labels: prodLabels,
+      datasets: [{
+        data:            prodData,
+        backgroundColor: prodColors,
+        borderRadius:    5,
+        borderSkipped:   false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipPlugin(t),
+          callbacks: {
+            label: ctx => '  Revenue: ' + fmt(ctx.raw),
+            afterLabel: (ctx) => {
+              const orders = [171,169,166,171,171,161,161,157,164,157];
+              return '  Pedidos: ' + orders[ctx.dataIndex];
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ...axisStyle(t), grid: { display: false } },
+        y: {
+          ...axisStyle(t),
+          min: 9000,
+          ticks: { ...axisStyle(t).ticks, callback: v => fmtK(v) }
+        }
+      }
+    }
+  });
+
+  // ---- 4. AGE GROUPS ----
+  new Chart(document.getElementById('chartAge'), {
+    type: 'bar',
+    data: {
+      labels: ['18–25', '26–35', '36–45', '46–55', '56–70'],
+      datasets: [{
+        label: 'Revenue',
+        data:            [30491, 44342, 43234, 45619, 65256],
+        backgroundColor: [
+          t.series[0] + '60',
+          t.series[0] + '80',
+          t.series[0] + 'A0',
+          t.series[0] + 'CC',
+          t.series[0],
+        ],
+        borderRadius:  6,
+        borderSkipped: false,
+        barThickness:  36,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipPlugin(t),
+          callbacks: {
+            label: ctx => '  Revenue: ' + fmt(ctx.raw),
+            afterLabel: (ctx) => {
+              const counts = [502, 742, 729, 753, 1105];
+              return '  Pedidos: ' + counts[ctx.dataIndex];
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ...axisStyle(t), grid: { display: false } },
+        y: {
+          ...axisStyle(t),
+          ticks: { ...axisStyle(t).ticks, callback: v => fmtK(v) }
+        }
+      }
+    }
+  });
+
+  // ---- 5. PAYMENT METHODS (doughnut) ----
+  const payLabels = ['PayPal', 'Credit Card', 'Cash', 'Debit Card', 'Venmo', 'Bank Transfer'];
+  const payData   = [677, 671, 670, 636, 634, 612];
+  new Chart(document.getElementById('chartPayment'), {
+    type: 'doughnut',
+    data: {
+      labels: payLabels,
+      datasets: [{
+        data:            payData,
+        backgroundColor: t.series.slice(0, 6),
+        borderWidth:     2,
+        borderColor:     t.surface,
+        hoverOffset:     6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          display: true,
+          position: 'right',
+          labels: {
+            color:     t.fgMuted,
+            font:      { size: 11, family: "'Inter', system-ui" },
+            padding:   10,
+            boxWidth:  10,
+            boxHeight: 10,
+            usePointStyle: true,
+          }
+        },
+        tooltip: {
+          ...tooltipPlugin(t),
+          callbacks: {
+            label: ctx => '  ' + ctx.label + ': ' + ctx.raw + ' clientes (' + ((ctx.raw/3900)*100).toFixed(1) + '%)'
+          }
+        }
+      }
+    }
+  });
+}
+
+// Boot after fonts load
+document.fonts.ready.then(buildCharts);
+</script>
