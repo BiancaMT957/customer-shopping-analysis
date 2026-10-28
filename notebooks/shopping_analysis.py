@@ -1,8 +1,8 @@
 """
 Customer Shopping Behavior Analysis
 =====================================
-Autor  : J. Valencia
-Email  : j.valencia@pucp.edu.pe
+Autor  : Bianca Merchán Torres
+Email  : bianca.merchan.t@uni.pe
 Curso  : Análisis de Datos — Portafolio
 Dataset: 3,900 clientes · 18 variables
 
