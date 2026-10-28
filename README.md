@@ -1,14 +1,14 @@
-# 🛍️ Customer Shopping Behavior Analysis
+#  Customer Shopping Behavior Analysis
 
 > **Proyecto de portafolio** | Análisis de datos de comportamiento de compra de 3,900 clientes retail usando Python, SQL y Power BI.
 
-**Autor:** J. Valencia  
-**Institución:** PUCP — Análisis de Datos  
-**Contacto:** j.valencia@pucp.edu.pe
+**Autor:** Bianca Merchán Torres
+**Institución:** UNI — Análisis de Datos  
+**Contacto:** bianca.merchan.t@uni.pe
 
 ---
 
-## 📋 Descripción del Proyecto
+##  Descripción del Proyecto
 
 Este proyecto analiza el comportamiento de compra de **3,900 clientes** de un retailer de moda, con **18 variables** por transacción. El objetivo es identificar patrones de consumo, calcular KPIs de negocio y proponer recomendaciones accionables para incrementar las ventas.
 
@@ -21,37 +21,37 @@ Este proyecto analiza el comportamiento de compra de **3,900 clientes** de un re
 
 ---
 
-## 📊 KPIs Principales
+##  KPIs Principales
 
 | KPI | Valor |
 |-----|-------|
-| 💰 Ingresos Totales | $233,081 |
-| 🛒 Ticket Promedio (AOV) | $59.76 |
-| ⭐ Rating Promedio | 3.75 / 5.0 |
-| 🔁 Tasa de Suscripción | 27% |
-| 🏷️ Uso de Código Promo | 43% |
-| 👥 Clientes analizados | 3,900 |
+|  Ingresos Totales | $233,081 |
+|  Ticket Promedio (AOV) | $59.76 |
+|  Rating Promedio | 3.75 / 5.0 |
+|  Tasa de Suscripción | 27% |
+|  Uso de Código Promo | 43% |
+|  Clientes analizados | 3,900 |
 
 ---
 
-## 🗂️ Estructura del Repositorio
+##  Estructura del Repositorio
 
 ```
 customer-shopping-analysis/
 │
-├── 📁 data/
+├──  data/
 │   └── customer_shopping_behavior.csv    # Dataset principal (3,900 filas · 18 col.)
 │
-├── 📁 notebooks/
+├──  notebooks/
 │   └── shopping_analysis.py             # Análisis completo en Python
 │
-├── 📁 sql/
+├──  sql/
 │   └── customer_behavior_queries.sql    # 10 consultas SQL comentadas
 │
-├── 📁 dashboard/
+├──  dashboard/
 │   └── index.html                       # Dashboard interactivo (HTML + Chart.js)
 │
-├── 📁 docs/
+├──  docs/
 │   └── analysis_charts.png             # Gráficos exportados (generado por Python)
 │
 ├── requirements.txt                     # Dependencias Python
@@ -61,7 +61,7 @@ customer-shopping-analysis/
 
 ---
 
-## 🛠️ Herramientas y Tecnologías
+##  Herramientas y Tecnologías
 
 | Herramienta | Uso |
 |-------------|-----|
@@ -73,7 +73,7 @@ customer-shopping-analysis/
 
 ---
 
-## 📈 Hallazgos Clave
+##  Hallazgos Clave
 
 ### Revenue por Categoría
 | Categoría | Revenue | Participación |
@@ -86,17 +86,17 @@ customer-shopping-analysis/
 ### Revenue por Temporada
 | Temporada | Revenue | Pedidos |
 |-----------|---------|---------|
-| 🍂 Otoño | $60,018 | 975 |
-| 🌸 Primavera | $58,679 | 999 |
-| ❄️ Invierno | $58,607 | 971 |
-| ☀️ Verano | $55,777 | 955 |
+|  Otoño | $60,018 | 975 |
+|  Primavera | $58,679 | 999 |
+|  Invierno | $58,607 | 971 |
+|  Verano | $55,777 | 955 |
 
 ### Segmento de Mayor Valor
 - El grupo **56–70 años** genera **$65,256** (28% del revenue total) con 1,105 pedidos.
 
 ---
 
-## 💡 Recomendaciones de Negocio
+##  Recomendaciones de Negocio
 
 1. **Programa de Lealtad** — Solo 27% suscrito. Un programa escalonado puede triplicar la retención.
 2. **Campaña Otoño** — Pico estacional de $60K. Aumentar stock y marketing en agosto–octubre.
@@ -106,7 +106,7 @@ customer-shopping-analysis/
 
 ---
 
-## 🚀 Cómo Ejecutar el Proyecto
+##  Cómo Ejecutar el Proyecto
 
 ### Requisitos
 ```bash
@@ -130,7 +130,7 @@ Las queries en `sql/customer_behavior_queries.sql` son compatibles con:
 
 ---
 
-## 📁 Dataset
+##  Dataset
 
 **Fuente:** Customer Shopping Behavior Dataset  
 **Registros:** 3,900 transacciones  
@@ -157,7 +157,7 @@ Las queries en `sql/customer_behavior_queries.sql` son compatibles con:
 
 ---
 
-## 📌 Notas del Proyecto
+##  Notas del Proyecto
 
 - El análisis fue realizado de forma independiente como proyecto de portafolio.
 - Los datos son públicos y de uso educativo.
