@@ -1,6 +1,6 @@
 -- =============================================================
 -- Customer Shopping Behavior Analysis — SQL Queries
--- Autor: J. Valencia | PUCP | Análisis de Datos
+-- Autor: Bianca Merchán Torres | UNI | Análisis de Datos
 -- Dataset: 3,900 transacciones · 18 variables
 -- =============================================================
 
